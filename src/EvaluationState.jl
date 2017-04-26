@@ -16,7 +16,7 @@ function EvaluationState(model::EduNets.AbstractModel, dataset::EduNets.Abstract
 	return EvaluationState(predicted, dataset.y);
 end
 
-function vcat(s1::EvaluationState, s2::EvaluationState)::EvaluationState
-	return EvaluationState(vcat(s1.predicted, s2.predicted), vcat(s1.real, s2.real));
+function vcat(states::EvaluationState...)::EvaluationState
+	return EvaluationState(mapreduce(x->x.predicted, vcat, states), mapreduce(x->x.real, vcat, states));
 end
 
