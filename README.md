@@ -1,4 +1,4 @@
-# EduNets-evaluate
+# EduNetsEvaluate
 
 A set of evaluation utilities for EduNets
  - PR curve
