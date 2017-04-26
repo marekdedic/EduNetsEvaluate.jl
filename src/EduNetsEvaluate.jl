@@ -6,5 +6,6 @@ module EduNetsEvaluate
 	include("PRcurve/PRcurveStage3.jl");
 	include("PRcurve/PRcurveStage4.jl");
 	include("PRcurve/PRcurveStage5.jl");
+	include("PRcurve/PRcurve.jl");
 end
 
