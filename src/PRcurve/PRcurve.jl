@@ -23,11 +23,7 @@ function plotPRcurve(curve::PRcurve)
 end
 
 function plotFscore(curve::PRcurve)
-	fscore = Vector{eltype(curve.precision)}(length(curve.precision))
-	#fscore .= 2 .* curve.precision .* curve.recall ./ (curve.precision .+ curve.recall);
-	for i in 1:length(curve.precision)
-		fscore[i] = 2 * curve.precision[i] * curve.recall[i] / (curve.precision[i] + curve.recall[i]);
-	end
+	fscore = 2 .* curve.precision .* curve.recall ./ (curve.precision .+ curve.recall);
 	Plots.plot(curve.thresholds, fscore; xlabel = "Threshold", ylabel = "F1 score", ylims = (0, 1.05), label = "F1 score");
 end
 
