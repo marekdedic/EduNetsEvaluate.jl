@@ -19,17 +19,18 @@ function evaluate(S5::PRcurveStage5, state::EvaluationState)
 	end
 	predicted = sort(state.predicted);
 	THcounter = 1;
+	len = length(predicted);
 	for i in 1:length(S5.thresholds)
 		if predicted[1] < S5.thresholds[THcounter]
 			break;
 		end
-		S5.PP[THcounter] = length(predicted);
+		S5.PP[THcounter] = len;
 		THcounter += 1;
 	end
 	i = 1;
-	while i <= (length(predicted) - 1)
+	while i <= (len - 1)
 		if predicted[i] <= S5.thresholds[THcounter] && predicted[i + 1] > S5.thresholds[THcounter]
-			S5.PP[THcounter] = length(predicted[i + 1:end]);
+			S5.PP[THcounter] = len - i;
 			THcounter += 1;
 		else
 			i += 1;

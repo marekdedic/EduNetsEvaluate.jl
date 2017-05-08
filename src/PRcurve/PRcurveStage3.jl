@@ -26,22 +26,23 @@ function evaluate(S3::PRcurveStage3, state::EvaluationState)
 	S3.RP = countnz(real .== 2);
 	TPcounter = S3.RP;
 	THcounter = 1;
+	len = length(predicted);
 	for i in 1:length(S3.thresholds)
 		if predicted[1] < S3.thresholds[THcounter]
 			break;
 		end
 		S3.TP[THcounter] = TPcounter;
-		S3.PP[THcounter] = length(predicted);
+		S3.PP[THcounter] = len;
 		THcounter += 1;
 	end
 	if(real[1] == 2)
 		TPcounter -= 1;
 	end
 	i = 1;
-	while i <= (length(predicted) - 1)
+	while i <= (len - 1)
 		if (predicted[i] <= S3.thresholds[THcounter] && predicted[i + 1] > S3.thresholds[THcounter])
 			S3.TP[THcounter] = TPcounter;
-			S3.PP[THcounter] = length(predicted[i + 1:end]);
+			S3.PP[THcounter] = len - i;
 			THcounter += 1;
 		else
 			if(real[i + 1] == 2)
