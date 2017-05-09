@@ -9,7 +9,7 @@ end
 
 function PRcurveStage5(S4::PRcurveStage4)::PRcurveStage5
 	thresholds = S4.thresholds;
-	PP = zeros(Int, length(thresholds));
+	PP = Vector{Int}(length(thresholds));
 	return PRcurveStage5(thresholds, PP);
 end
 
@@ -36,6 +36,7 @@ function evaluate(S5::PRcurveStage5, state::EvaluationState)
 			i += 1;
 		end
 	end
+	S5.PP[THcounter:end] .= 0;
 end
 
 function PRcurveStage5(S4::PRcurveStage4, state::EvaluationState)::PRcurveStage5

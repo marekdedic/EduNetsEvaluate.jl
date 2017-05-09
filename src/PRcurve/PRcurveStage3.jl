@@ -11,8 +11,8 @@ end
 
 function PRcurveStage3(S2::PRcurveStage2)::PRcurveStage3
 	thresholds = S2.thresholds;
-	TP = zeros(Int, length(thresholds));
-	PP = zeros(Int, length(thresholds));
+	TP = Vector{Int}(length(thresholds));
+	PP = Vector{Int}(length(thresholds));
 	return PRcurveStage3(thresholds, TP, PP, 0);
 end
 
@@ -51,6 +51,8 @@ function evaluate(S3::PRcurveStage3, state::EvaluationState)
 			i += 1;
 		end
 	end
+	S3.TP[THcounter:end] .= 0;
+	S3.PP[THcounter:end] .= 0;
 end
 
 function PRcurveStage3(S2::PRcurveStage2, state::EvaluationState)::PRcurveStage3
