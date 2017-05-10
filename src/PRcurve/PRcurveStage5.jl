@@ -46,9 +46,9 @@ function PRcurveStage5(S4::PRcurveStage4, state::EvaluationState)::PRcurveStage5
 end
 
 function +(S5::PRcurveStage5, state::EvaluationState)::PRcurveStage5
-	PP = S5.PP;
+	PP = deepcopy(S5.PP);
 	evaluate(S5, state);
-	S5.PP += PP;
+	S5.PP .+= PP;
 	return S5;
 end
 
