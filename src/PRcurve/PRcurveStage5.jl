@@ -9,7 +9,7 @@ end
 
 function PRcurveStage5(S4::PRcurveStage4)::PRcurveStage5
 	thresholds = S4.thresholds;
-	PP = Vector{Int}(length(thresholds));
+	PP = zeros(Int, length(thresholds));
 	return PRcurveStage5(thresholds, PP);
 end
 
