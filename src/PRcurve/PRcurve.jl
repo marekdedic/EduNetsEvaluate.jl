@@ -10,11 +10,14 @@ end
 
 function PRcurve(S4::PRcurveStage4)::PRcurve
 	precision::Vector{eltype(S4.thresholds)} = S4.TP ./ S4.PP;
+	precision[S4.PP .== 0] .= 1;
 	return PRcurve(S4.thresholds, precision, S4.recall);
 end
 
 function PRcurve(S4::PRcurveStage4, S5::PRcurveStage5)::PRcurve
-	precision = S4.TP ./ (S4.PP .+ S5.PP);
+	PP = S4.PP .+ S5.PP;
+	precision::Vector{eltype(S4.thresholds)} = S4.TP ./ PP;
+	precision[PP .== 0] .= 1;
 	return PRcurve(S4.thresholds, precision, S4.recall);
 end
 
