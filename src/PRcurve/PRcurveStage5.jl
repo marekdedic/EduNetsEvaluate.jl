@@ -29,6 +29,9 @@ function evaluate(S5::PRcurveStage5, state::EvaluationState)
 	end
 	i = 1;
 	while i <= (len - 1)
+		if THcounter > length(S5.thresholds)
+			break;
+		end
 		if predicted[i] <= S5.thresholds[THcounter] && predicted[i + 1] > S5.thresholds[THcounter]
 			S5.PP[THcounter] = len - i;
 			THcounter += 1;

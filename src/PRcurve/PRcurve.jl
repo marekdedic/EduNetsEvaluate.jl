@@ -40,14 +40,14 @@ function PRcurve(model::EduNets.AbstractModel, positive::Vector{EduNets.Abstract
 	return PRcurve(statesPositive, statesNegative; thresholdCount = thresholdCount);
 end
 
-function PRcurve(positive::Vector{EvaluationState}, negative::Vector{EvaluationState}; thresholdCount::Int = 100)::PRcurve
+function PRcurve{T<:AbstractFloat}(positive::Vector{EvaluationState{T}}, negative::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::PRcurve
 	S1vec = map(s->PRcurveStage1(s), positive);
 	S1 = vcat(S1vec...);
 	S2 = PRcurveStage2(S1, thresholdCount = thresholdCount);
 	S3vec = map(s->PRcurveStage3(S2, s), positive);
 	S3 = vcat(S3vec...);
 	S4 = PRcurveStage4(S3);
-	S5vec = map(n-PRcurveStage5(S4, n), negative);
+	S5vec = map(n->PRcurveStage5(S4, n), negative);
 	S5 = vcat(S5vec...);
 	return PRcurve(S4, S5);
 end
