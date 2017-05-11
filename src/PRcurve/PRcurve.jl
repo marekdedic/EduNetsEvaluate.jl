@@ -9,7 +9,7 @@ type PRcurve{A<:AbstractFloat}
 end
 
 function PRcurve(S4::PRcurveStage4)::PRcurve
-	precision = S4.TP ./ S4.PP;
+	precision::Vector{eltype(S4.thresholds)} = S4.TP ./ S4.PP;
 	return PRcurve(S4.thresholds, precision, S4.recall);
 end
 
