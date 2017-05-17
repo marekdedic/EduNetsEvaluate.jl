@@ -1,4 +1,4 @@
-# EduNetsEvaluate
+# EduNetsEvaluate.jl
 
 A set of evaluation utilities for EduNets
  - PR curve
