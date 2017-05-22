@@ -10,7 +10,7 @@ end
 function EvaluationState(model::EduNets.AbstractModel, dataset::EduNets.AbstractDataset; forwardRuns::Int = 1)::EvaluationState
 	predicted = zeros(AbstractFloat, length(dataset.y));
 	for i in 1:forwardRuns
-		predicted .+= EduNets.forward!(model, dataset)[end][end, :];
+		predicted .+= EduNets.project!(model, dataset)[end, :];
 	end
 	predicted ./= forwardRuns;
 	return EvaluationState(predicted, dataset.y);
