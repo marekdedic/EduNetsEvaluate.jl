@@ -12,7 +12,9 @@ function EvaluationState(model::EduNets.AbstractModel, dataset::EduNets.Abstract
 	for i in 1:forwardRuns
 		predicted .+= EduNets.project!(model, dataset)[end, :];
 	end
-	predicted ./= forwardRuns;
+	if forwardRuns > 1
+		predicted ./= forwardRuns;
+	end
 	return EvaluationState(predicted, dataset.y);
 end
 
