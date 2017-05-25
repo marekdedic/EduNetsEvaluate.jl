@@ -43,7 +43,8 @@ function evaluate(S3::PRcurveStage3, state::EvaluationState)
 		if THcounter > length(S3.thresholds)
 			break;
 		end
-		if (predicted[i] < S3.thresholds[THcounter] && predicted[i + 1] >= S3.thresholds[THcounter])
+		threshold = S3.thresholds[THcounter];
+		if (predicted[i] < threshold && predicted[i + 1] >= threshold)
 			S3.TP[THcounter] = TPcounter;
 			S3.PP[THcounter] = len - i;
 			THcounter += 1;
