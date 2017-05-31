@@ -6,7 +6,7 @@ include("testROCcurve.jl");
 @testset "All" begin 
 	@testset "PR curve" begin
 		@testset "Partial PR curve" begin
-			for i in 1:250000
+			for i in 1:25000
 				@test testPRcurvePartial();
 			end
 		end
