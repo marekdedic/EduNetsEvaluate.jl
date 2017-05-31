@@ -1,59 +1,61 @@
-import Plots;
-export ROCcurve, plot, plotROCcurve;
+import Plots, EduNets.AbstractDataset, EduNets.AbstractModel;
 
-type ROCcurve
-	TPR::Vector{AbstractFloat}; # True-positive rate
-	FPR::Vector{AbstractFloat}; # False-positive rate
+export ROCcurve, plotROCcurve, plotFscore;
+
+type ROCcurve{A<:AbstractFloat}
+	thresholds::Vector{A};
+	TPR::Vector{A}; # True positive rate
+	FPR::Vector{A}; # False positive rate
 end
 
-#=
-function ROCcurve(length::Int)::ROCcurve
-	return ROCcurve(zeros(length), zeros(length));
-end
-=#
-
-#=
-function ROCcurve(state::EvaluationState)::ROCcurve
-	pmask = state.real .== 2; # Bool array, true when real == 2 i. e. for real positives
-	nmask = state.real .== 1;
-	curve = ROCcurve(sum(nmask))
-	thresholds = sort(state.predicted[nmask], rev = true);
-	for (i,it) in enumerate(thresholds)
-		curve.FPR[i] = mean(state.predicted[nmask] .> it); # Mean over Bool array (percentage of true values), true when truly negative but prediction higher then threshold
-		curve.TPR[i] = mean(state.predicted[pmask] .> it);
-	end
-	return curve;
-end
-=#
-
-function ROCcurve(fragment::ROCcurveFragment)::ROCcurve
-	TPR = fragment.TP ./ fragment.RP;
-	FPR = fragment.FP ./ fragment.RN;
-	return ROCcurve(TPR, FPR)
+function ROCcurve(S4::ROCcurveStage4)::ROCcurve
+	FPR::Vector{eltype(S4.thresholds)} = S4.FP ./ S4.RN;
+	return ROCcurve(S4.thresholds, S4.TPR, FPR);
 end
 
-function ROCcurve(state::EvaluationState)
-	return ROCcurve(ROCcurveFragment(state));
+function ROCcurve(S4::ROCcurveStage4, S5::ROCcurveStage5)::ROCcurve
+	FPR::Vector{eltype(S4.thresholds)} = (S4.FP .+ S5.FP) ./ (S4.RN + S5.RN);
+	return ROCcurve(S4.thresholds, S4.TPR, FPR);
 end
 
-function ROCcurve(model::AbstractModel, dataset::AbstractDataset)
-	return ROCcurve(ROCcurveFragment(model, dataset));
-end
+# Plotting
 
-function plot(curve::ROCcurve)
-	Plots.plot(curve.FPR, curve.TPR; xlabel = "False-positive rate", ylabel = "True-positive rate", xlims = (0, 1), ylims = (0, 1), label = "ROC Curve");
+function plotROCcurve(curve::ROCcurve)
+	Plots.plot(curve.FPR, curve.TPR; xlabel = "False positive rate", ylabel = "True positive rate", xlims = (0, 1), ylims = (0, 1), label = "ROC Curve");
 	Plots.plot!(identity; linestyle = :dot, label="");
 end
 
-function plot(fragment::ROCcurveFragment)
-	plot(ROCcurve(fragment));
+# Complete ROCcurve functions
+
+function ROCcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}, negative::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::ROCcurve
+	statesMixed = map(p->EvaluationState(model, p), mixed);
+	statesNegative = map(n->EvaluationState(model, n), negative);
+	return ROCcurve(statesMixed, statesNegative; thresholdCount = thresholdCount);
 end
 
-function plotROCcurve(state::EvaluationState)
-	plot(ROCcurve(state));
+function ROCcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}, negative::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::ROCcurve
+	S1vec = map(s->ROCcurveStage1(s), mixed);
+	S1 = vcat(S1vec...);
+	S2 = ROCcurveStage2(S1, thresholdCount = thresholdCount);
+	S3vec = map(s->ROCcurveStage3(S2, s), mixed);
+	S3 = vcat(S3vec...);
+	S4 = ROCcurveStage4(S3);
+	S5vec = map(n->ROCcurveStage5(S4, n), negative);
+	S5 = vcat(S5vec...);
+	return ROCcurve(S4, S5);
 end
 
-function plotROCcurve(model::AbstractModel, dataset::AbstractDataset)
-	plot(ROCcurve(model, dataset));
+function ROCcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::ROCcurve
+		statesMixed = map(p->EvaluationState(model, p), mixed);
+	return ROCcurve(statesMixed; thresholdCount = thresholdCount);
 end
 
+function ROCcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::ROCcurve
+	S1vec = map(s->ROCcurveStage1(s), mixed);
+	S1 = vcat(S1vec...);
+	S2 = ROCcurveStage2(S1, thresholdCount = thresholdCount);
+	S3vec = map(s->ROCcurveStage3(S2, s), mixed);
+	S3 = vcat(S3vec...);
+	S4 = ROCcurveStage4(S3);
+	return ROCcurve(S4);
+end
