@@ -34,17 +34,17 @@ end
 
 # Complete PRcurve functions
 
-function PRcurve(model::EduNets.AbstractModel, positive::Vector{EduNets.AbstractDataset}, negative::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::PRcurve
-	statesPositive = map(p->EvaluationState(model, p), positive);
+function PRcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}, negative::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::PRcurve
+	statesMixed = map(p->EvaluationState(model, p), mixed);
 	statesNegative = map(n->EvaluationState(model, n), negative);
-	return PRcurve(statesPositive, statesNegative; thresholdCount = thresholdCount);
+	return PRcurve(statesMixed, statesNegative; thresholdCount = thresholdCount);
 end
 
-function PRcurve{T<:AbstractFloat}(positive::Vector{EvaluationState{T}}, negative::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::PRcurve
-	S1vec = map(s->PRcurveStage1(s), positive);
+function PRcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}, negative::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::PRcurve
+	S1vec = map(s->PRcurveStage1(s), mixed);
 	S1 = vcat(S1vec...);
 	S2 = PRcurveStage2(S1, thresholdCount = thresholdCount);
-	S3vec = map(s->PRcurveStage3(S2, s), positive);
+	S3vec = map(s->PRcurveStage3(S2, s), mixed);
 	S3 = vcat(S3vec...);
 	S4 = PRcurveStage4(S3);
 	S5vec = map(n->PRcurveStage5(S4, n), negative);
@@ -52,16 +52,16 @@ function PRcurve{T<:AbstractFloat}(positive::Vector{EvaluationState{T}}, negativ
 	return PRcurve(S4, S5);
 end
 
-function PRcurve(model::EduNets.AbstractModel, positive::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::PRcurve
-		statesPositive = map(p->EvaluationState(model, p), positive);
-	return PRcurve(statesPositive; thresholdCount = thresholdCount);
+function PRcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::PRcurve
+		statesMixed = map(p->EvaluationState(model, p), mixed);
+	return PRcurve(statesMixed; thresholdCount = thresholdCount);
 end
 
-function PRcurve{T<:AbstractFloat}(positive::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::PRcurve
-	S1vec = map(s->PRcurveStage1(s), positive);
+function PRcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::PRcurve
+	S1vec = map(s->PRcurveStage1(s), mixed);
 	S1 = vcat(S1vec...);
 	S2 = PRcurveStage2(S1, thresholdCount = thresholdCount);
-	S3vec = map(s->PRcurveStage3(S2, s), positive);
+	S3vec = map(s->PRcurveStage3(S2, s), mixed);
 	S3 = vcat(S3vec...);
 	S4 = PRcurveStage4(S3);
 	return PRcurve(S4);

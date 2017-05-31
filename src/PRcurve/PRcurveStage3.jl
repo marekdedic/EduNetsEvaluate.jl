@@ -35,7 +35,7 @@ function evaluate(S3::PRcurveStage3, state::EvaluationState)
 		S3.PP[THcounter] = len;
 		THcounter += 1;
 	end
-	if(real[1] == 2)
+	if real[1] == 2
 		TPcounter -= 1;
 	end
 	i = 1;
@@ -49,7 +49,7 @@ function evaluate(S3::PRcurveStage3, state::EvaluationState)
 			S3.PP[THcounter] = len - i;
 			THcounter += 1;
 		else
-			if(real[i + 1] == 2)
+			if real[i + 1] == 2
 				TPcounter -= 1;
 			end
 			i += 1;
@@ -66,27 +66,14 @@ function PRcurveStage3(S2::PRcurveStage2, state::EvaluationState)::PRcurveStage3
 end
 
 function vcat(stages::PRcurveStage3...)::PRcurveStage3
-	nullclamp(vec::Vector, index::Int) = index <= length(vec) ? vec[index] : 0;
-
 	len = length(stages[1].thresholds);
 	TP = Vector{Int}(len);
 	PP = Vector{Int}(len);
-	RP = mapreduce(x->x.RP, +, stages);
-	indices = ones(Int, length(stages));
 	for i in 1:len
-		TP[i] = mapreduce(x->nullclamp(x[2].TP, indices[x[1]]), +, enumerate(stages));
-		PP[i] = mapreduce(x->nullclamp(x[2].PP, indices[x[1]]), +, enumerate(stages));
-		validThresholds = Vector{eltype(stages[1].thresholds)}(length(stages))
-		for j in 1:length(stages)
-			if indices[j] <= length(stages[j].thresholds)
-				validThresholds[j] = stages[j].thresholds[indices[j]];
-			else
-				validThresholds[j] = Inf;
-			end
-		end
-		j = indmin(validThresholds);
-		indices[j] += 1;
+		TP[i] = mapreduce(x->x.TP[i], +, stages);
+		PP[i] = mapreduce(x->x.PP[i], +, stages);
 	end
+	RP = mapreduce(x->x.RP, +, stages);
 	return PRcurveStage3(stages[1].thresholds, TP, PP, RP);
 end
 
