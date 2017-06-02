@@ -9,7 +9,7 @@ end
 
 function PRcurveStage5(S4::PRcurveStage4)::PRcurveStage5
 	thresholds = S4.thresholds;
-	PP = zeros(Int, length(thresholds));
+	PP = zeros(Int, size(thresholds, 1));
 	return PRcurveStage5(thresholds, PP);
 end
 
@@ -19,8 +19,8 @@ function evaluate(S5::PRcurveStage5, state::EvaluationState)
 	end
 	predicted = sort(state.predicted);
 	THcounter = 1;
-	len = length(predicted);
-	for i in 1:length(S5.thresholds)
+	len = size(predicted, 1);
+	for i in 1:size(S5.thresholds, 1)
 		if predicted[1] < S5.thresholds[THcounter]
 			break;
 		end
@@ -29,7 +29,7 @@ function evaluate(S5::PRcurveStage5, state::EvaluationState)
 	end
 	i = 1;
 	while i <= (len - 1)
-		if THcounter > length(S5.thresholds)
+		if THcounter > size(S5.thresholds, 1)
 			break;
 		end
 		threshold = S5.thresholds[THcounter];
@@ -57,8 +57,8 @@ function +(S5::PRcurveStage5, state::EvaluationState)::PRcurveStage5
 end
 
 function vcat(stages::PRcurveStage5...)::PRcurveStage5
-	PP = Vector{Int}(length(stages[1].thresholds))
-	for i in 1:length(PP)
+	PP = Vector{Int}(size(stages[1].thresholds, 1))
+	for i in 1:size(PP, 1)
 		PP[i] = mapreduce(x->x.PP[i], +, stages);
 	end
 	return PRcurveStage5(stages[1].thresholds, PP);

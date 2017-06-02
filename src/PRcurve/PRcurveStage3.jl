@@ -11,8 +11,8 @@ end
 
 function PRcurveStage3(S2::PRcurveStage2)::PRcurveStage3
 	thresholds = S2.thresholds;
-	TP = Vector{Int}(length(thresholds));
-	PP = Vector{Int}(length(thresholds));
+	TP = Vector{Int}(size(thresholds, 1));
+	PP = Vector{Int}(size(thresholds, 1));
 	return PRcurveStage3(thresholds, TP, PP, 0);
 end
 
@@ -26,8 +26,8 @@ function evaluate(S3::PRcurveStage3, state::EvaluationState)
 	S3.RP = countnz(real .== 2);
 	TPcounter = S3.RP;
 	THcounter = 1;
-	len = length(predicted);
-	for i in 1:length(S3.thresholds)
+	len = size(predicted, 1);
+	for i in 1:size(S3.thresholds, 1)
 		if predicted[1] < S3.thresholds[THcounter]
 			break;
 		end
@@ -40,7 +40,7 @@ function evaluate(S3::PRcurveStage3, state::EvaluationState)
 	end
 	i = 1;
 	while i <= (len - 1)
-		if THcounter > length(S3.thresholds)
+		if THcounter > size(S3.thresholds, 1)
 			break;
 		end
 		threshold = S3.thresholds[THcounter];
@@ -66,7 +66,7 @@ function PRcurveStage3(S2::PRcurveStage2, state::EvaluationState)::PRcurveStage3
 end
 
 function vcat(stages::PRcurveStage3...)::PRcurveStage3
-	len = length(stages[1].thresholds);
+	len = size(stages[1].thresholds, 1);
 	TP = Vector{Int}(len);
 	PP = Vector{Int}(len);
 	for i in 1:len
