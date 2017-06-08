@@ -1,4 +1,4 @@
-import Plots, EduNets.AbstractDataset, EduNets.AbstractModel;
+import Plots.plot, Plots.plot!, EduNets.AbstractDataset, EduNets.AbstractModel, ThreadedMap.tmap;
 
 export ROCcurve, plotROCcurve, plotFscore;
 
@@ -27,34 +27,38 @@ end
 
 # Complete ROCcurve functions
 
-function ROCcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}, negative::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::ROCcurve
-	statesMixed = map(p->EvaluationState(model, p), mixed);
-	statesNegative = map(n->EvaluationState(model, n), negative);
+function ROCcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}, negative::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100, threaded::Bool = false)::ROCcurve
+	fun = threaded ? ThreadedMap.tmap : map;
+	statesMixed = fun(p->EvaluationState(model, p), mixed);
+	statesNegative = fun(n->EvaluationState(model, n), negative);
 	return ROCcurve(statesMixed, statesNegative; thresholdCount = thresholdCount);
 end
 
-function ROCcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}, negative::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::ROCcurve
-	S1vec = map(s->ROCcurveStage1(s), mixed);
+function ROCcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}, negative::Vector{EvaluationState{T}}; thresholdCount::Int = 100, threaded::Bool = false)::ROCcurve
+	fun = threaded ? ThreadedMap.tmap : map;
+	S1vec = fun(s->ROCcurveStage1(s), mixed);
 	S1 = vcat(S1vec...);
 	S2 = ROCcurveStage2(S1, thresholdCount = thresholdCount);
-	S3vec = map(s->ROCcurveStage3(S2, s), mixed);
+	S3vec = fun(s->ROCcurveStage3(S2, s), mixed);
 	S3 = vcat(S3vec...);
 	S4 = ROCcurveStage4(S3);
-	S5vec = map(n->ROCcurveStage5(S4, n), negative);
+	S5vec = fun(n->ROCcurveStage5(S4, n), negative);
 	S5 = vcat(S5vec...);
 	return ROCcurve(S4, S5);
 end
 
-function ROCcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100)::ROCcurve
-		statesMixed = map(p->EvaluationState(model, p), mixed);
+function ROCcurve(model::EduNets.AbstractModel, mixed::Vector{EduNets.AbstractDataset}; thresholdCount::Int = 100, threaded::Bool = false)::ROCcurve
+	fun = threaded ? ThreadedMap.tmap : map;
+	statesMixed = fun(p->EvaluationState(model, p), mixed);
 	return ROCcurve(statesMixed; thresholdCount = thresholdCount);
 end
 
-function ROCcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}; thresholdCount::Int = 100)::ROCcurve
-	S1vec = map(s->ROCcurveStage1(s), mixed);
+function ROCcurve{T<:AbstractFloat}(mixed::Vector{EvaluationState{T}}; thresholdCount::Int = 100, threaded::Bool = false)::ROCcurve
+	fun = threaded ? ThreadedMap.tmap : map;
+	S1vec = fun(s->ROCcurveStage1(s), mixed);
 	S1 = vcat(S1vec...);
 	S2 = ROCcurveStage2(S1, thresholdCount = thresholdCount);
-	S3vec = map(s->ROCcurveStage3(S2, s), mixed);
+	S3vec = fun(s->ROCcurveStage3(S2, s), mixed);
 	S3 = vcat(S3vec...);
 	S4 = ROCcurveStage4(S3);
 	return ROCcurve(S4);
