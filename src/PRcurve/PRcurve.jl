@@ -1,4 +1,5 @@
-import Plots.plot, EduNets.AbstractDataset, EduNets.AbstractModel, ThreadedMap.tmap;
+import EduNets.AbstractDataset, EduNets.AbstractModel, ThreadedMap.tmap;
+import Plots;
 
 export PRcurve, plotPRcurve, plotFscore;
 
