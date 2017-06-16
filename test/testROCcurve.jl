@@ -3,7 +3,7 @@ using MLBase;
 using StatsBase;
 using Plots;
 
-function testROCcurvePartial()
+function testROCcurvePartial():Bool
 	real = rand(0:1, 1024);
 	predicted = rand(Float32, 1024);
 	rocvec = MLBase.roc(real, predicted, nquantile(predicted, 100));
@@ -20,7 +20,7 @@ function testROCcurvePartial()
 	return precisionResult && recallResult;
 end
 
-function testROCcurveFull()
+function testROCcurveFull():Bool
 	real1 = rand(0:1, 1024);
 	predicted1 = rand(Float32, 1024);
 	real2 = zeros(Int, 1024);
