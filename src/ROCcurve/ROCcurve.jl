@@ -21,20 +21,28 @@ end
 
 # Plotting
 
-function plotROCcurve(curve::ROCcurve)
-	Plots.plot(curve.FPR, curve.TPR; xlabel = "False positive rate", ylabel = "True positive rate", xlims = (0, 1), ylims = (0, 1), label = "ROC Curve");
-	Plots.plot!(identity; linestyle = :dot, label="");
+function plotROCcurve(curves::Tuple{AbstractString, ROCcurve}...)
+	lims = (0, 1);
+	Plots.plot(identity; linestyle= :dot, label = "", xlabel = "False positive rate", ylabel = "True positive rate", xlims = lims, ylims = lims);
+	pl(tuple) = Plots.plot!(tuple[2].FPR, tuple[2].TPR; label = tuple[1]);
+	pl.(curves);
+	Plots.gui();
 end
 
-function plotDETcurve(curve::ROCcurve)
-	qnorm(x) = sqrt(2) * erfinv(2x - 1);
+plotROCcurve(curve::ROCcurve) = plotROCcurve(("ROC Curve", curve));
 
-	FNR = 1 .- curve.TPR;
+function plotDETcurve(curves::Tuple{AbstractString, ROCcurve}...)
+	qnorm(x) = sqrt(2) * erfinv(2x - 1);
+	lims = (qnorm(0.001), qnorm(0.55));
 	tickvalues = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40, 50];
 	ticks = (qnorm.(tickvalues ./ 100), string.(tickvalues));
-	lims = (qnorm(0.001), qnorm(0.55));
-	Plots.plot(qnorm.(curve.FPR), qnorm.(FNR); xlabel = "False positive rate (%)", ylabel = "False negative rate (%)", xlims = lims, ylims = lims, xticks = ticks, yticks = ticks, aspect_ratio = :equal, label = "DET Curve");
+	Plots.plot(; xlabel = "False positive rate (%)", ylabel = "False negative rate (%)", xlims = lims, ylims = lims, xticks = ticks, yticks = ticks, aspect_ratio = :equal);
+	pl(tuple) =	Plots.plot!(qnorm.(tuple[2].FPR), qnorm.(1 .- tuple[2].TPR); label = tuple[1]);
+	pl.(curves);
+	Plots.gui();
 end
+
+plotDETcurve(curve::ROCcurve) = plotDETcurve(("DET Curve", curve));
 
 # Complete ROCcurve functions
 

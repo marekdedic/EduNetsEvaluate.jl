@@ -24,14 +24,27 @@ end
 
 # Plotting
 
-function plotPRcurve(curve::PRcurve)
-	Plots.plot(curve.recall, curve.precision; xlabel = "Recall", ylabel = "Precision", xlims = (0, 1.05), ylims = (0, 1.05), label = "PR Curve");
+function plotPRcurve(curves::Tuple{AbstractString, PRcurve}...)
+	lims = (0, 1.05);
+	Plots.plot(; xlabel = "Recall", ylabel = "Precision", xlims = lims, ylims = lims)
+	pl(tuple) = Plots.plot!(tuple[2].recall, tuple[2].precision; label = tuple[1]);
+	pl.(curves);
+	Plots.gui();
 end
 
-function plotFscore(curve::PRcurve)
-	fscore = 2 .* curve.precision .* curve.recall ./ (curve.precision .+ curve.recall);
-	Plots.plot(curve.thresholds, fscore; xlabel = "Threshold", ylabel = "F1 score", ylims = (0, 1.05), label = "F1 score");
+plotPRcurve(curve::PRcurve) = plotPRcurve(("PR Curve", curve));
+
+function plotFscore(curves::Tuple{AbstractString, PRcurve}...)
+	Plots.plot(; xlabel = "Threshold", ylabel = "F1 score", ylims = (0, 1.05))
+	function pl(tuple)
+		fscore = 2 .* tuple[2].precision .* tuple[2].recall ./ (tuple[2].precision .+ tuple[2].recall);
+		Plots.plot!(tuple[2].thresholds, fscore; label = tuple[1]);
+	end
+	pl.(curves);
+	Plots.gui();
 end
+
+plotFscore(curve::PRcurve) = plotFscore(("F1 score", curve));
 
 # Complete PRcurve functions
 
