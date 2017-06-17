@@ -1,7 +1,7 @@
 import EduNets.AbstractDataset, EduNets.AbstractModel, ThreadedMap.tmap;
 import Plots;
 
-export PRcurve, plotPRcurve, plotFscore;
+export PRcurve, plotPRcurve, plotFBetaScore, plotFscore;
 
 type PRcurve{A<:AbstractFloat}
 	thresholds::Vector{A};
@@ -34,15 +34,22 @@ end
 
 plotPRcurve(curve::PRcurve) = plotPRcurve(("PR Curve", curve));
 
-function plotFscore(curves::Tuple{AbstractString, PRcurve}...)
-	Plots.plot(; xlabel = "Threshold", ylabel = "F1 score", ylims = (0, 1.05))
+function plotFBetaScore(beta::Float32, curves::Tuple{AbstractString, PRcurve}...)
+	Plots.plot(; xlabel = "Threshold", ylabel = "F" * string(beta) * " score", ylims = (0, 1.05))
 	function pl(tuple)
-		fscore = 2 .* tuple[2].precision .* tuple[2].recall ./ (tuple[2].precision .+ tuple[2].recall);
+		fscore = (1 + beta^2) .* tuple[2].precision .* tuple[2].recall ./ ((beta^2 * tuple[2].precision) .+ tuple[2].recall);
 		Plots.plot!(tuple[2].thresholds, fscore; label = tuple[1]);
 	end
 	pl.(curves);
 	Plots.gui();
 end
+
+function plotFBetaScore(beta::Float32, curve::PRcurve)
+	name = "F" * string(beta) * " score";
+	plotFBetaScore(beta, (name, curve));
+end
+
+plotFscore(curves::Tuple{AbstractString, PRcurve}...) = plotFBetaScore(1.0f0, curves...);
 
 plotFscore(curve::PRcurve) = plotFscore(("F1 score", curve));
 
