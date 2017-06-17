@@ -1,7 +1,7 @@
 import EduNets.AbstractDataset, EduNets.AbstractModel, ThreadedMap.tmap;
 import Plots;
 
-export ROCcurve, plotROCcurve, plotFscore;
+export ROCcurve, plotROCcurve, plotDETcurve;
 
 type ROCcurve{A<:AbstractFloat}
 	thresholds::Vector{A};
@@ -24,6 +24,16 @@ end
 function plotROCcurve(curve::ROCcurve)
 	Plots.plot(curve.FPR, curve.TPR; xlabel = "False positive rate", ylabel = "True positive rate", xlims = (0, 1), ylims = (0, 1), label = "ROC Curve");
 	Plots.plot!(identity; linestyle = :dot, label="");
+end
+
+function plotDETcurve(curve::ROCcurve)
+	qnorm(x) = sqrt(2) * erfinv(2x - 1);
+
+	FNR = 1 .- curve.TPR;
+	tickvalues = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40, 50];
+	ticks = (qnorm.(tickvalues ./ 100), string.(tickvalues));
+	lims = (qnorm(0.001), qnorm(0.55));
+	Plots.plot(qnorm.(curve.FPR), qnorm.(FNR); xlabel = "False positive rate (%)", ylabel = "False negative rate (%)", xlims = lims, ylims = lims, xticks = ticks, yticks = ticks, aspect_ratio = :equal, label = "DET Curve");
 end
 
 # Complete ROCcurve functions
