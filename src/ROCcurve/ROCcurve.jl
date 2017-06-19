@@ -21,28 +21,32 @@ end
 
 # Plotting
 
-function plotROCcurve(curves::Tuple{AbstractString, ROCcurve}...)
+function plotROCcurve{S<:AbstractString, T<:AbstractFloat}(labels::Vector{S}, curves::Vector{ROCcurve{T}}; log::Bool = false, title::AbstractString = "")
 	lims = (0, 1);
-	Plots.plot(identity; linestyle= :dot, label = "", xlabel = "False positive rate", ylabel = "True positive rate", xlims = lims, ylims = lims);
-	pl(tuple) = Plots.plot!(tuple[2].FPR, tuple[2].TPR; label = tuple[1]);
-	pl.(curves);
+	if log
+		Plots.plot(0.001:0.001:1, 0.001:0.001:1; linestyle= :dot, label = "", xlabel = "False positive rate", ylabel = "True positive rate", xlims = (0.001, 1), ylims = lims, xscale = :log10, title = title);
+	else
+		Plots.plot(identity; linestyle= :dot, label = "", xlabel = "False positive rate", ylabel = "True positive rate", xlims = lims, ylims = lims, title = title);
+	end
+	pl(label, curve) = Plots.plot!(curve.FPR, curve.TPR; label = label);
+	pl.(labels, curves);
 	Plots.gui();
 end
 
-plotROCcurve(curve::ROCcurve) = plotROCcurve(("ROC Curve", curve));
+plotROCcurve(curve::ROCcurve; log::Bool = false, title::AbstractString = "") = plotROCcurve(["ROC Curve"], [curve]; log = log, title = title);
 
-function plotDETcurve(curves::Tuple{AbstractString, ROCcurve}...)
+function plotDETcurve{S<:AbstractString, T<:AbstractFloat}(labels::Vector{S}, curves::Vector{ROCcurve{T}}; title::AbstractString = "")
 	qnorm(x) = sqrt(2) * erfinv(2x - 1);
 	lims = (qnorm(0.001), qnorm(0.55));
 	tickvalues = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40, 50];
 	ticks = (qnorm.(tickvalues ./ 100), string.(tickvalues));
-	Plots.plot(; xlabel = "False positive rate (%)", ylabel = "False negative rate (%)", xlims = lims, ylims = lims, xticks = ticks, yticks = ticks, aspect_ratio = :equal);
-	pl(tuple) =	Plots.plot!(qnorm.(tuple[2].FPR), qnorm.(1 .- tuple[2].TPR); label = tuple[1]);
-	pl.(curves);
+	Plots.plot(; xlabel = "False positive rate (%)", ylabel = "False negative rate (%)", xlims = lims, ylims = lims, xticks = ticks, yticks = ticks, aspect_ratio = :equal, title = title);
+	pl(label, curve) =	Plots.plot!(qnorm.(curve.FPR), qnorm.(1 .- curve.TPR); label = label);
+	pl.(labels, curves);
 	Plots.gui();
 end
 
-plotDETcurve(curve::ROCcurve) = plotDETcurve(("DET Curve", curve));
+plotDETcurve(curve::ROCcurve; title::AbstractString = "") = plotDETcurve(["DET Curve"], [curve]; title = title);
 
 # Complete ROCcurve functions
 

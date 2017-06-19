@@ -24,34 +24,27 @@ end
 
 # Plotting
 
-function plotPRcurve(curves::Tuple{AbstractString, PRcurve}...)
+function plotPRcurve{S<:AbstractString, T<:AbstractFloat}(labels::Vector{S}, curves::Vector{PRcurve{T}}; title::AbstractString = "")
 	lims = (0, 1.05);
-	Plots.plot(; xlabel = "Recall", ylabel = "Precision", xlims = lims, ylims = lims)
-	pl(tuple) = Plots.plot!(tuple[2].recall, tuple[2].precision; label = tuple[1]);
-	pl.(curves);
+	Plots.plot(; xlabel = "Recall", ylabel = "Precision", xlims = lims, ylims = lims, title = title)
+	pl(label, curve) = Plots.plot!(curve.recall, curve.precision; label = label);
+	pl.(labels, curves);
 	Plots.gui();
 end
 
-plotPRcurve(curve::PRcurve) = plotPRcurve(("PR Curve", curve));
+plotPRcurve(curve::PRcurve; title::AbstractString = "") = plotPRcurve(["PR Curve"], [curve]; title = title);
 
-function plotFBetaScore(beta::Float32, curves::Tuple{AbstractString, PRcurve}...)
-	Plots.plot(; xlabel = "Threshold", ylabel = "F" * string(beta) * " score", ylims = (0, 1.05))
-	function pl(tuple)
-		fscore = (1 + beta^2) .* tuple[2].precision .* tuple[2].recall ./ ((beta^2 * tuple[2].precision) .+ tuple[2].recall);
-		Plots.plot!(tuple[2].thresholds, fscore; label = tuple[1]);
+function plotFscore{S<:AbstractString, T<:AbstractFloat}(labels::Vector{S}, curves::Vector{PRcurve{T}}; beta::AbstractFloat = 1.0, title::AbstractString = "")
+	Plots.plot(; xlabel = "Threshold", ylabel = "F" * string(beta) * " score", ylims = (0, 1.05), title = title)
+	function pl(label, curve)
+		fscore = (1 + beta^2) .* curve.precision .* curve.recall ./ ((beta^2 * curve.precision) .+ curve.recall);
+		Plots.plot!(curve.thresholds, fscore; label = label);
 	end
-	pl.(curves);
+	pl.(labels, curves);
 	Plots.gui();
 end
 
-function plotFBetaScore(beta::Float32, curve::PRcurve)
-	name = "F" * string(beta) * " score";
-	plotFBetaScore(beta, (name, curve));
-end
-
-plotFscore(curves::Tuple{AbstractString, PRcurve}...) = plotFBetaScore(1.0f0, curves...);
-
-plotFscore(curve::PRcurve) = plotFscore(("F1 score", curve));
+plotFscore(curve::PRcurve; beta::AbstractFloat = 1.0, title::AbstractString = "") = plotFscore(["F" * string(beta) * " score"], [curve]; beta = beta, title = title);
 
 # Complete PRcurve functions
 
